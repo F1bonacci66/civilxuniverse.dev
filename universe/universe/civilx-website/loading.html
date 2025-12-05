@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Загрузка - CivilX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .loading-container {
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .logo {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .loading-text {
+            font-size: 1.5rem;
+            color: #05FBE2;
+            margin-bottom: 1rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(5, 251, 226, 0.3);
+            border-top: 4px solid #05FBE2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <img src="./main_icon.svg" alt="CivilX" class="logo">
+        <div class="spinner"></div>
+    </div>
+    
+    <script>
+        // Проверяем авторизацию и перенаправляем
+        (function() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                // Если нет токена, идем на авторизацию
+                setTimeout(() => {
+                    window.location.href = './auth/';
+                }, 1500);
+            } else {
+                // Если токен есть, идем в ЛК
+                setTimeout(() => {
+                    window.location.href = './dashboard/';
+                }, 1500);
+            }
+        })();
+    </script>
+</body>
+</html>

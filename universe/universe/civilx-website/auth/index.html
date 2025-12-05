@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Авторизация - CivilX</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif; 
+            background: linear-gradient(135deg, #000 0%, #0a0a0a 25%, #1a1a1a 50%, #0f0f0f 75%, #000 100%);
+            color: #fff; 
+            line-height: 1.6; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 1rem; 
+        }
+        
+        /* Header with Linear.app style */
+        .header { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            z-index: 50; 
+            transition: all 0.3s ease;
+        }
+        
+        .header-content { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            height: 4rem; 
+        }
+        
+        .logo { 
+            font-weight: bold; 
+            font-size: 1.5rem; 
+            color: #fff; 
+            text-decoration: none; 
+            transition: all 0.3s ease;
+        }
+        
+        .nav { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+        }
+        
+        .nav a { 
+            color: #fff; 
+            text-decoration: none; 
+            font-weight: 500; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.5rem; 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(20,184,166,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav a:hover::before {
+            left: 100%;
+        }
+        
+        .nav a:hover { 
+            background: rgba(20,184,166,0.1); 
+            color: #14b8a6; 
+            transform: translateY(-2px);
+        }
+        
+        .user-icon { 
+            color: #fff; 
+            text-decoration: none; 
+            padding: 0.75rem; 
+            border-radius: 0.5rem; 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .user-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(20,184,166,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+        
+        .user-icon:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .user-icon:hover { 
+            background: rgba(20,184,166,0.1); 
+            color: #14b8a6; 
+            transform: scale(1.1);
+        }
+        
+        /* Main content with Linear.app style */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(20,184,166,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .auth-container {
+            background: rgba(31,41,55,0.6); 
+            border-radius: 1.5rem;
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(20,184,166,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(20,184,166,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .auth-tab:hover::before {
+            left: 100%;
+        }
+        
+        .auth-tab.active {
+            color: #14b8a6;
+            border-bottom-color: #14b8a6;
+        }
+        
+        .auth-tab:hover {
+            background: rgba(20,184,166,0.05);
+            color: #14b8a6;
+        }
+        
+        .auth-form {
+            display: none;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .auth-form.active {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 0.75rem;
+            background: rgba(17,24,39,0.8);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20,184,166,0.1);
+            background: rgba(17,24,39,0.9);
+        }
+        
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: rgba(20,184,166,0.3);
+        }
+        
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: #000;
+            font-weight: 600;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(20,184,166,0.3);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(20,184,166,0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .error-message {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: none;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        .form-group input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+        
+        .form-group input.success {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+        }
+        
+        .success-message {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid #22c55e;
+            color: #86efac;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: none;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .spinner {
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top: 2px solid #14b8a6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Footer */
+        .footer { 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            padding: 2rem 0; 
+            text-align: center; 
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .footer p { 
+            color: #999; 
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .auth-container { 
+                padding: 2rem; 
+                margin: 1rem; 
+                border-radius: 1rem;
+            }
+            .main-content {
+                padding: 6rem 0 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="./" class="logo">
+                    <img src="./main_icon.svg" alt="CivilX" style="height: 120px; margin-top: 10px;">
+                </a>
+                <nav class="nav">
+                    <a href="./">О нас</a>
+                    <a href="./pricing/">Продукт</a>
+                    <a href="./subscriptions/">Подписки</a>
+                </nav>
+        <a href="./auth/" class="user-icon" title="Войти в аккаунт">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </a>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <div class="auth-tab active" onclick="switchTab('login')">Вход</div>
+                    <div class="auth-tab" onclick="switchTab('register')">Регистрация</div>
+                </div>
+
+                <!-- Error/Success Messages -->
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form active">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" id="loginPassword" name="password" required>
+                    </div>
+                    <div class="loading" id="loginLoading">
+                        <div class="spinner"></div>
+                        <p>Вход в систему...</p>
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">Войти</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="userType">Тип пользователя</label>
+                        <select id="userType" name="user_type" required>
+                            <option value="">Выберите тип</option>
+                            <option value="user">Физическое лицо</option>
+                            <option value="organization">Организация</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerName">Имя</label>
+                        <input type="text" id="registerName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль</label>
+                        <input type="password" id="registerPassword" name="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Подтвердите пароль</label>
+                        <input type="password" id="confirmPassword" name="confirm_password" required minlength="6">
+                        <div id="passwordMismatch" class="error-message" style="display: none;">
+                            Пароли не совпадают
+                        </div>
+                    </div>
+                    <div class="form-group" id="companyGroup" style="display: none;">
+                        <label for="companyName">Название компании</label>
+                        <input type="text" id="companyName" name="company_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Телефон (необязательно)</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="loading" id="registerLoading">
+                        <div class="spinner"></div>
+                        <p>Создание аккаунта...</p>
+                    </div>
+                    <button type="submit" class="btn" id="registerBtn">Зарегистрироваться</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>© 2024 CivilX. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            // Update forms
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.getElementById(tab + 'Form').classList.add('active');
+            
+            // Clear messages
+            hideMessages();
+        }
+
+        // Show/hide company field based on user type
+        document.getElementById('userType').addEventListener('change', function() {
+            const companyGroup = document.getElementById('companyGroup');
+            const companyName = document.getElementById('companyName');
+            
+            if (this.value === 'organization') {
+                companyGroup.style.display = 'block';
+                companyName.required = true;
+            } else {
+                companyGroup.style.display = 'none';
+                companyName.required = false;
+            }
+        });
+
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function setLoading(formType, isLoading) {
+            const loading = document.getElementById(formType + 'Loading');
+            const btn = document.getElementById(formType + 'Btn');
+            
+            if (isLoading) {
+                loading.style.display = 'block';
+                btn.disabled = true;
+                btn.textContent = 'Загрузка...';
+            } else {
+                loading.style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = formType === 'login' ? 'Войти' : 'Зарегистрироваться';
+            }
+        }
+
+        // API functions
+        async function apiRequest(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            // Проверяем, что ответ не пустой
+            const responseText = await response.text();
+            if (!responseText.trim()) {
+                throw new Error('Пустой ответ от сервера');
+            }
+            
+            const result = JSON.parse(responseText);
+            
+            if (!response.ok) {
+                throw new Error(result.error || 'Ошибка сервера');
+            }
+            
+            return result;
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideMessages();
+            setLoading('login', true);
+
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                const result = await apiRequest('/auth-api.php/api/login', data);
+                
+                // Debug token
+                console.log('Login result:', result);
+                console.log('Token received:', result.token);
+                console.log('Token type:', typeof result.token);
+                console.log('Token length:', result.token ? result.token.length : 'null');
+                console.log('Token parts:', result.token ? result.token.split('.').length : 'null');
+                
+                // Store token
+                localStorage.setItem('authToken', result.token);
+                localStorage.setItem('user', JSON.stringify(result.user));
+                
+                showSuccess('Успешный вход! Перенаправление...');
+                
+                // Redirect to dashboard or home
+                setTimeout(() => {
+                    window.location.href = './dashboard/';
+                }, 1500);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading('login', false);
+            }
+        });
+
+        // Функция проверки совпадения паролей
+        function validatePasswords() {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('passwordMismatch');
+            const confirmInput = document.getElementById('confirmPassword');
+            
+            // Убираем предыдущие классы
+            confirmInput.classList.remove('error', 'success');
+            
+            if (confirmPassword === '') {
+                // Если поле пустое, не показываем ошибку
+                errorDiv.style.display = 'none';
+                return true;
+            } else if (password !== confirmPassword) {
+                // Пароли не совпадают
+                errorDiv.style.display = 'block';
+                confirmInput.classList.add('error');
+                return false;
+            } else {
+                // Пароли совпадают
+                errorDiv.style.display = 'none';
+                confirmInput.classList.add('success');
+                return true;
+            }
+        }
+
+        // Функция подсветки незаполненных обязательных полей
+        function highlightEmptyFields() {
+            const requiredFields = [
+                { id: 'userType', name: 'Тип пользователя' },
+                { id: 'registerName', name: 'Имя' },
+                { id: 'registerEmail', name: 'Email' },
+                { id: 'registerPassword', name: 'Пароль' },
+                { id: 'confirmPassword', name: 'Подтверждение пароля' }
+            ];
+
+            // Проверяем, выбрана ли организация
+            const userType = document.getElementById('userType').value;
+            if (userType === 'organization') {
+                requiredFields.push({ id: 'companyName', name: 'Название компании' });
+            }
+
+            const emptyFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (element) {
+                    // Убираем предыдущие классы ошибок
+                    element.classList.remove('error');
+                    
+                    // Проверяем, заполнено ли поле
+                    const isEmpty = !element.value || element.value.trim() === '';
+                    
+                    if (isEmpty) {
+                        element.classList.add('error');
+                        emptyFields.push(field.name);
+                    }
+                }
+            });
+
+            return emptyFields;
+        }
+
+        // Функция очистки подсветки ошибок
+        function clearFieldErrors() {
+            const allInputs = document.querySelectorAll('#registerForm input, #registerForm select');
+            allInputs.forEach(input => {
+                input.classList.remove('error');
+            });
+        }
+
+        // Добавляем обработчики для проверки паролей в реальном времени
+        document.getElementById('registerPassword').addEventListener('input', validatePasswords);
+        document.getElementById('confirmPassword').addEventListener('input', validatePasswords);
+        
+        // Добавляем обработчики для очистки ошибок при вводе
+        const formInputs = document.querySelectorAll('#registerForm input, #registerForm select');
+        formInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                // Убираем класс ошибки при вводе
+                this.classList.remove('error');
+                
+                // Если это поле подтверждения пароля, проверяем пароли
+                if (this.id === 'confirmPassword' || this.id === 'registerPassword') {
+                    validatePasswords();
+                }
+            });
+        });
+
+        // Register form handler
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            hideMessages();
+            clearFieldErrors();
+            
+            // Проверяем совпадение паролей
+            if (!validatePasswords()) {
+                showError('Пароли не совпадают');
+                return;
+            }
+            
+            // Проверяем заполненность всех обязательных полей
+            const emptyFields = highlightEmptyFields();
+            if (emptyFields.length > 0) {
+                const fieldNames = emptyFields.join(', ');
+                showError(`Заполните обязательные поля: ${fieldNames}`);
+                return;
+            }
+            
+            setLoading('register', true);
+
+            try {
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData);
+                
+                // Удаляем поле подтверждения пароля перед отправкой
+                delete data.confirm_password;
+                
+                // Remove empty fields
+                Object.keys(data).forEach(key => {
+                    if (data[key] === '') {
+                        delete data[key];
+                    }
+                });
+                
+                // Отладочная информация
+                console.log('Данные для отправки:', data);
+                console.log('Тип пользователя:', data.user_type);
+                console.log('Название компании:', data.company_name);
+                console.log('Все поля формы:', Object.keys(data));
+                
+                const result = await apiRequest('/auth-api.php/api/register', data);
+                
+                // Debug token
+                console.log('Register result:', result);
+                console.log('Token received:', result.token);
+                console.log('Token type:', typeof result.token);
+                console.log('Token length:', result.token ? result.token.length : 'null');
+                console.log('Token parts:', result.token ? result.token.split('.').length : 'null');
+                
+                // Store token
+                localStorage.setItem('authToken', result.token);
+                localStorage.setItem('user', JSON.stringify(result.user));
+                
+                showSuccess('Регистрация успешна! Перенаправление...');
+                
+                // Redirect to dashboard or home
+                setTimeout(() => {
+                    window.location.href = './dashboard/';
+                }, 1500);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading('register', false);
+            }
+        });
+
+        // Check if user is already logged in
+        window.addEventListener('load', function() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                // User is already logged in, redirect to home
+                window.location.href = './dashboard/';
+            }
+        });
+    </script>
+</body>
+</html>

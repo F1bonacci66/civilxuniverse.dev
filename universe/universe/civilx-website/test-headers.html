@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест заголовков Authorization</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .code { background: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Тест заголовков Authorization</h1>
+    
+    <button onclick="testHeaders()">Тест заголовков</button>
+    <button onclick="testAPI()">Тест API с токеном</button>
+    <button onclick="clearStorage()">Очистить localStorage</button>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        async function testHeaders() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Отправка запроса для проверки заголовков...';
+            
+            try {
+                const response = await fetch('/debug-headers.php', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer test-token-12345'
+                    }
+                });
+                
+                const result = await response.json();
+                console.log('Headers test result:', result);
+                
+                showResult('success', `
+                    <h3>✅ Результат проверки заголовков</h3>
+                    <div class="code">Метод: ${result.method}
+Auth Header: ${result.auth_header || 'НЕ НАЙДЕН'}
+Все заголовки: ${JSON.stringify(result.all_headers, null, 2)}
+Server Auth: ${JSON.stringify(result.server_auth, null, 2)}</div>
+                `);
+                
+            } catch (error) {
+                showResult('error', `
+                    <h3>❌ Ошибка проверки заголовков</h3>
+                    <div class="code">Ошибка: ${error.message}</div>
+                `);
+            }
+        }
+        
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Тестирование API с токеном...';
+            
+            try {
+                // Получаем токен из localStorage
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    showResult('error', '<h3>❌ Токен не найден</h3><p>Сначала авторизуйтесь</p>');
+                    return;
+                }
+                
+                console.log('Testing API with token:', token.substring(0, 20) + '...');
+                
+                const response = await fetch('/auth-api.php/api/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                console.log('API response status:', response.status);
+                const responseText = await response.text();
+                console.log('API response text:', responseText);
+                
+                if (response.status === 401) {
+                    showResult('error', `
+                        <h3>❌ API возвращает 401 Unauthorized</h3>
+                        <div class="code">Статус: ${response.status}
+Ответ: ${responseText}
+Токен: ${token.substring(0, 50)}...</div>
+                        <p><strong>Проблема:</strong> Заголовок Authorization не доходит до API</p>
+                    `);
+                } else {
+                    const result = JSON.parse(responseText);
+                    showResult('success', `
+                        <h3>✅ API работает с токеном</h3>
+                        <div class="code">Статус: ${response.status}
+Ответ: ${JSON.stringify(result, null, 2)}</div>
+                    `);
+                }
+                
+            } catch (error) {
+                showResult('error', `
+                    <h3>❌ Ошибка тестирования API</h3>
+                    <div class="code">Ошибка: ${error.message}</div>
+                `);
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            showResult('info', '<h3>🧹 localStorage очищен</h3>');
+        }
+        
+        function showResult(type, content) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = content;
+        }
+        
+        // Проверяем токен при загрузке
+        window.onload = function() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                console.log('Токен найден:', token.substring(0, 50) + '...');
+            } else {
+                console.log('Токен не найден');
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Dockerfile для development окружения
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Устанавливаем зависимости
+COPY package.json package-lock.json ./
+RUN npm ci && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/cache/apk/*
+
+# Копируем конфигурационные файлы
+COPY next.config.mjs tsconfig.json tailwind.config.ts postcss.config.mjs ./
+COPY next-env.d.ts ./
+
+# Копируем исходный код (будет перезаписан через volumes в docker-compose)
+COPY app ./app
+COPY components ./components
+COPY lib ./lib
+
+# Экспонируем порт
+EXPOSE 3001
+
+# Переменные окружения
+ENV NODE_ENV=development
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
+ENV DOCKER_CONTAINER="true"
+
+# Команда запуска (будет переопределена в docker-compose)
+CMD ["npm", "run", "dev"]
+

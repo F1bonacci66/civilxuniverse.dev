@@ -1,0 +1,73 @@
+# Зависимости
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Собранные файлы
+.next
+out
+output
+dist
+build
+
+# Переменные окружения
+.env
+.env.local
+.env*.local
+.env.development
+.env.production
+.env.test
+
+# Системные файлы
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE и редакторы
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Документация и README
+*.md
+README*
+CHANGELOG*
+LICENSE*
+
+# Тесты
+coverage
+.nyc_output
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Временные файлы
+*.log
+*.tmp
+*.temp
+.cache
+
+# Скрипты развёртывания (не нужны в образе)
+deploy.ps1
+*.sh
+
+# Старые сборки и артефакты
+out/
+output/
+

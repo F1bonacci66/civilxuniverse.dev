@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    mem_limit: 16g
+    memswap_limit: 17g
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - RVT_CONVERTER_API_URL=
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - XDG_CACHE_HOME=/app/.cache
+    volumes:
+      - ./storage:/app/storage
+      - ./exporters:/app/exporters
+      - /opt/civilx-exporter:/opt/civilx-exporter
+      - /opt/civilx-backend/cache:/app/.cache
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+

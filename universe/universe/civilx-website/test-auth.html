@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест авторизации CivilX</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { padding: 8px; width: 300px; border: 1px solid #ccc; border-radius: 3px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .code { background: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Тест авторизации CivilX</h1>
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Введите email">
+    </div>
+    
+    <div class="form-group">
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" placeholder="Введите пароль">
+    </div>
+    
+    <button onclick="testLogin()">Тест авторизации</button>
+    <button onclick="checkUsers()">Проверить пользователей в БД</button>
+    <button onclick="clearStorage()">Очистить localStorage</button>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!email || !password) {
+                showResult('error', 'Введите email и пароль');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Отправка запроса...';
+            
+            try {
+                console.log('🔐 Тест авторизации...');
+                console.log('Email:', email);
+                
+                const response = await fetch('/auth-api.php/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('📄 Response text:', responseText);
+                console.log('📏 Response length:', responseText.length);
+                
+                if (!responseText.trim()) {
+                    throw new Error('Пустой ответ от сервера');
+                }
+                
+                // Проверяем, что это JSON
+                if (!responseText.trim().startsWith('{') && !responseText.trim().startsWith('[')) {
+                    throw new Error('Ответ не является JSON. Получен: ' + responseText.substring(0, 100) + '...');
+                }
+                
+                const result = JSON.parse(responseText);
+                console.log('📊 Parsed result:', result);
+                
+                if (result.token) {
+                    const tokenParts = result.token.split('.');
+                    console.log('🎫 Token analysis:');
+                    console.log('  - Type:', typeof result.token);
+                    console.log('  - Length:', result.token.length);
+                    console.log('  - Parts:', tokenParts.length);
+                    console.log('  - Preview:', result.token.substring(0, 50) + '...');
+                    
+                    // Сохраняем токен
+                    localStorage.setItem('authToken', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    showResult('success', `
+                        <h3>✅ Авторизация успешна!</h3>
+                        <div class="code">Токен: ${result.token.substring(0, 100)}...
+Тип: ${typeof result.token}
+Длина: ${result.token.length}
+Частей: ${tokenParts.length}
+Формат: ${tokenParts.length === 3 ? 'JWT ✅' : 'НЕ JWT ❌'}
+Пользователь: ${result.user.name} (${result.user.email})</div>
+                        <p><a href="/dashboard/" target="_blank">Перейти в ЛК</a></p>
+                    `);
+                } else {
+                    showResult('error', `
+                        <h3>❌ Ошибка авторизации</h3>
+                        <div class="code">Ошибка: ${result.error || 'Неизвестная ошибка'}
+Статус: ${response.status}
+Ответ: ${responseText}</div>
+                    `);
+                }
+                
+            } catch (error) {
+                console.error('💥 Ошибка:', error);
+                showResult('error', `
+                    <h3>❌ Ошибка запроса</h3>
+                    <div class="code">Ошибка: ${error.message}
+Stack: ${error.stack}</div>
+                `);
+            }
+        }
+        
+        async function checkUsers() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Проверка пользователей в БД...';
+            
+            try {
+                const response = await fetch('/check-users.php');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    let usersHtml = '<h3>👥 Пользователи в БД:</h3>';
+                    if (result.users.length === 0) {
+                        usersHtml += '<p>Пользователей не найдено</p>';
+                    } else {
+                        usersHtml += '<div class="code">';
+                        result.users.forEach(user => {
+                            usersHtml += `ID: ${user.id}
+Email: ${user.email}
+Имя: ${user.name}
+Тип: ${user.user_type}
+Активен: ${user.is_active ? 'Да' : 'Нет'}
+Создан: ${user.created_at}
+
+`;
+                        });
+                        usersHtml += '</div>';
+                    }
+                    showResult('success', usersHtml);
+                } else {
+                    showResult('error', `<h3>❌ Ошибка БД</h3><p>${result.message}</p>`);
+                }
+            } catch (error) {
+                showResult('error', `<h3>❌ Ошибка запроса</h3><p>${error.message}</p>`);
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            showResult('info', '<h3>🧹 localStorage очищен</h3>');
+        }
+        
+        function showResult(type, content) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = content;
+        }
+        
+        // Проверяем текущий токен при загрузке
+        window.onload = function() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                console.log('🎫 Текущий токен в localStorage:', token.substring(0, 50) + '...');
+                console.log('Тип токена:', typeof token);
+                console.log('Длина токена:', token.length);
+                console.log('Частей токена:', token.split('.').length);
+            } else {
+                console.log('❌ Токен в localStorage отсутствует');
+            }
+        };
+    </script>
+</body>
+</html>

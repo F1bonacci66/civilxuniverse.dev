@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест с разными учетными данными</title>
+</head>
+<body>
+    <h1>Тест с разными учетными данными</h1>
+    <button onclick="testLogin('dima.groshev05@gmail.com', 'password123')">Тест 1: dima.groshev05@gmail.com</button>
+    <button onclick="testLogin('test@test.com', 'test')">Тест 2: test@test.com</button>
+    <button onclick="testLogin('admin@civilx.ru', 'admin')">Тест 3: admin@civilx.ru</button>
+    <button onclick="testLogin('user@civilx.ru', 'user')">Тест 4: user@civilx.ru</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin(email, password) {
+            try {
+                console.log(`Тестируем: ${email} / ${password}`);
+                
+                const response = await fetch('/auth-api.php/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const text = await response.text();
+                console.log(`Ответ для ${email}:`, text);
+                
+                if (text.trim()) {
+                    const result = JSON.parse(text);
+                    
+                    if (result.token) {
+                        console.log(`✅ УСПЕХ для ${email}!`);
+                        console.log('=== АНАЛИЗ ТОКЕНА ===');
+                        console.log('Token type:', typeof result.token);
+                        console.log('Token length:', result.token.length);
+                        console.log('Token parts:', result.token.split('.').length);
+                        console.log('Token value:', result.token);
+                        
+                        // Проверяем, является ли это JWT
+                        const parts = result.token.split('.');
+                        if (parts.length === 3) {
+                            console.log('✅ Это JWT токен');
+                            try {
+                                const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                                const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                                console.log('JWT Header:', header);
+                                console.log('JWT Payload:', payload);
+                            } catch (e) {
+                                console.log('❌ Ошибка декодирования JWT:', e);
+                            }
+                        } else {
+                            console.log('❌ Это НЕ JWT токен (ожидается 3 части, получено ' + parts.length + ')');
+                        }
+                        
+                        document.getElementById('result').innerHTML = `<h3>✅ УСПЕХ для ${email}:</h3><pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    } else {
+                        console.log(`❌ Ошибка для ${email}:`, result.error);
+                        document.getElementById('result').innerHTML = `<h3>❌ Ошибка для ${email}:</h3><p style="color: red;">${result.error}</p>`;
+                    }
+                } else {
+                    console.log(`❌ Пустой ответ для ${email}`);
+                    document.getElementById('result').innerHTML = `<h3>❌ Пустой ответ для ${email}</h3>`;
+                }
+                
+            } catch (error) {
+                console.error(`Error for ${email}:`, error);
+                document.getElementById('result').innerHTML = `<h3>❌ Ошибка для ${email}:</h3><p style="color: red;">${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

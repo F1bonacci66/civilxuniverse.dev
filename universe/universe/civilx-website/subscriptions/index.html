@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <base href="/">
+    <title>Подписки - CivilX</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif; 
+            background: linear-gradient(135deg, #000 0%, #0a0a0a 25%, #1a1a1a 50%, #0f0f0f 75%, #000 100%);
+            color: #fff; 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 1rem; 
+        }
+        
+        /* Header with Linear.app style */
+        .header { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            background: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            z-index: 50; 
+            transition: all 0.3s ease;
+        }
+        
+        .header-content { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            height: 4rem; 
+        }
+        
+        .logo { 
+            font-weight: bold; 
+            font-size: 1.5rem; 
+            color: #fff; 
+            text-decoration: none; 
+            transition: all 0.3s ease;
+        }
+        
+        .nav { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+        }
+        
+        .nav a { 
+            color: #fff; 
+            text-decoration: none; 
+            font-weight: 500; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.5rem; 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(20,184,166,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav a:hover::before {
+            left: 100%;
+        }
+        
+        .nav a:hover { 
+            background: rgba(20,184,166,0.1); 
+            color: #14b8a6; 
+            transform: translateY(-2px);
+        }
+        
+        .user-icon { 
+            color: #fff; 
+            text-decoration: none; 
+            padding: 0.75rem; 
+            border-radius: 0.5rem; 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .user-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(20,184,166,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+        
+        .user-icon:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .user-icon:hover { 
+            background: rgba(20,184,166,0.1); 
+            color: #14b8a6; 
+            transform: scale(1.1);
+        }
+        
+        /* Hero section with Linear.app animations */
+        .hero { 
+            padding: 8rem 0 4rem; 
+            text-align: center; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(20,184,166,0.05) 0%, rgba(30,41,59,0.1) 25%, rgba(15,23,42,0.08) 50%, rgba(20,184,166,0.03) 75%, transparent 100%);
+            pointer-events: none;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+        
+        .hero h1 { 
+            font-size: 3.5rem; 
+            font-weight: 700; 
+            margin-bottom: 1.5rem; 
+            background: linear-gradient(135deg, #fff 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero p { 
+            color: #ccc; 
+            font-size: 1.25rem; 
+            margin-bottom: 3rem; 
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+        
+        /* Buttons with Linear.app style */
+        .btn { 
+            display: inline-block; 
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: #000; 
+            font-weight: 600; 
+            padding: 1rem 2rem; 
+            border-radius: 0.75rem; 
+            text-decoration: none; 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(20,184,166,0.3);
+            border: none;
+            cursor: pointer;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover { 
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(20,184,166,0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary { 
+            background: rgba(55,65,81,0.8); 
+            color: #fff; 
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover { 
+            background: rgba(75,85,99,0.8); 
+            border-color: rgba(20,184,166,0.3);
+        }
+        
+        .btn:disabled { 
+            background: #666; 
+            cursor: not-allowed; 
+            opacity: 0.6;
+        }
+        
+        /* Sections with improved styling */
+        .section { 
+            padding: 4rem 0; 
+            position: relative;
+        }
+        
+        .section.bg-gray { 
+            background: linear-gradient(135deg, rgba(17,24,39,0.8) 0%, rgba(31,41,55,0.4) 100%);
+            position: relative;
+        }
+        
+        .section.bg-gray::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at top, rgba(20,184,166,0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .section h2 { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin-bottom: 3rem; 
+            text-align: center; 
+            background: linear-gradient(135deg, #fff 0%, #14b8a6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Subscription cards with Linear.app style */
+        .subscriptions-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); 
+            gap: 2rem; 
+            margin-bottom: 3rem; 
+        }
+        
+        .subscription-card { 
+            background: rgba(31,41,55,0.6); 
+            border-radius: 1.5rem; 
+            padding: 2.5rem; 
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .subscription-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(20,184,166,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .subscription-card:hover::before {
+            opacity: 1;
+        }
+        
+        .subscription-card:hover { 
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(20,184,166,0.3);
+        }
+        
+        .subscription-card.featured { 
+            border: 2px solid #14b8a6; 
+            background: rgba(20,184,166,0.1);
+            box-shadow: 0 0 30px rgba(20,184,166,0.2);
+        }
+        
+        .subscription-card.featured::before {
+            background: linear-gradient(135deg, rgba(20,184,166,0.2) 0%, transparent 50%);
+        }
+        
+        .subscription-icon { 
+            font-size: 3.5rem; 
+            margin-bottom: 1.5rem; 
+            text-align: center; 
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .subscription-title { 
+            font-size: 1.75rem; 
+            font-weight: 700; 
+            margin-bottom: 1rem; 
+            text-align: center; 
+            color: #fff;
+        }
+        
+        .subscription-description { 
+            color: #ccc; 
+            margin-bottom: 2rem; 
+            text-align: center; 
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .subscription-features { 
+            list-style: none; 
+            margin-bottom: 2rem; 
+        }
+        
+        .subscription-features li { 
+            padding: 0.75rem 0; 
+            color: #ccc; 
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .subscription-features li:hover {
+            color: #fff;
+            transform: translateX(5px);
+        }
+        
+        .subscription-features li:before { 
+            content: "✓ "; 
+            color: #14b8a6; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+        }
+        
+        .subscription-plans { 
+            display: flex; 
+            gap: 1rem; 
+            margin-bottom: 1rem; 
+        }
+        
+        .plan-option { 
+            flex: 1; 
+            text-align: center; 
+        }
+        
+        .plan-price { 
+            font-size: 1.75rem; 
+            font-weight: 700; 
+            margin-bottom: 1rem; 
+            color: #14b8a6; 
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .plan-price .period { 
+            font-size: 0.9rem; 
+            color: #999; 
+            font-weight: 400;
+        }
+        
+        .plan-btn { 
+            width: 100%; 
+            margin-bottom: 0.5rem; 
+        }
+        
+        .quantity-selector { 
+            margin: 2rem 0; 
+            text-align: center; 
+        }
+        
+        .quantity-selector label { 
+            display: block; 
+            margin-bottom: 1rem; 
+            font-weight: 600; 
+            color: #fff; 
+            font-size: 1.1rem;
+        }
+        
+        .quantity-input { 
+            width: 100px; 
+            padding: 0.75rem 1rem; 
+            border: 2px solid rgba(255,255,255,0.2); 
+            border-radius: 0.5rem; 
+            font-size: 1rem; 
+            text-align: center; 
+            background: rgba(31,41,55,0.8);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-input:focus { 
+            outline: none; 
+            border-color: #14b8a6; 
+            box-shadow: 0 0 0 3px rgba(20,184,166,0.1);
+        }
+        
+        .auth-prompt { 
+            text-align: center; 
+            padding: 2.5rem; 
+            background: rgba(20,184,166,0.1); 
+            border-radius: 1rem; 
+            border: 1px solid rgba(20,184,166,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-prompt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(20,184,166,0.1) 0%, transparent 50%);
+        }
+        
+        .auth-prompt-content { 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .auth-prompt-content h3 { 
+            color: #14b8a6; 
+            margin-bottom: 1rem; 
+            font-size: 1.5rem; 
+            font-weight: 700;
+        }
+        
+        .auth-prompt-content p { 
+            color: #ccc; 
+            margin-bottom: 2rem; 
+            font-size: 1.1rem;
+        }
+        
+        /* Footer */
+        .footer { 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            padding: 2rem 0; 
+            text-align: center; 
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .footer p { 
+            color: #999; 
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                opacity: 0.8;
+                transform: scale(1.02) rotate(0.5deg);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.01) rotate(-0.3deg);
+            }
+            75% {
+                opacity: 0.85;
+                transform: scale(1.015) rotate(0.2deg);
+            }
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .hero h1 { font-size: 2.5rem; }
+            .subscription-plans { flex-direction: column; }
+            .subscriptions-grid {
+                grid-template-columns: 1fr;
+            }
+            .subscription-card {
+                padding: 2rem;
+            }
+        }
+        
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="./" class="logo">
+                    <img src="./main_icon.svg" alt="CivilX" style="height: 120px; margin-top: 10px;">
+                </a>
+                <nav class="nav">
+                    <a href="./">О нас</a>
+                    <a href="./pricing/">Продукт</a>
+                    <a href="./subscriptions/">Подписки</a>
+                </nav>
+                <a href="./loading.html" class="user-icon" title="Войти в аккаунт">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Подписки на группы плагинов</h1>
+                <p>Выберите подходящую группу плагинов для вашей организации</p>
+                <a href="./" class="btn btn-secondary">← Вернуться на главную</a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="subscriptions-grid">
+                    <!-- DataHub Subscription -->
+                    <div class="subscription-card featured">
+                        <div class="subscription-icon">📊</div>
+                        <div class="subscription-title">DataHub</div>
+                        <div class="subscription-description">Группа плагинов для работы с данными и экспорта</div>
+                        
+                        <ul class="subscription-features">
+                            <li>DataViewer - просмотр и анализ данных</li>
+                            <li>DataExporter - экспорт в различные форматы</li>
+                            <li>DataAnalyzer - анализ и статистика</li>
+                            <li>Техническая поддержка 24/7</li>
+                            <li>Регулярные обновления</li>
+                        </ul>
+                        
+                        <!-- Quantity Selector (только для авторизованных) -->
+                        <div class="quantity-selector" id="quantitySection" style="display: none;">
+                            <label for="quantity">Количество:</label>
+                            <input type="number" id="quantity" name="quantity" min="1" max="10" value="1" class="quantity-input">
+                        </div>
+                        
+                        <!-- Планы подписки (только для авторизованных) -->
+                        <div class="subscription-plans" id="pricingSection" style="display: none;">
+                            <div class="plan-option">
+                                <div class="plan-price">15,000₽ <span class="period">/месяц</span></div>
+                                <button class="btn plan-btn" onclick="purchaseSubscription('DataHub', 'monthly')">Купить подписку</button>
+                            </div>
+                            <div class="plan-option">
+                                <div class="plan-price">150,000₽ <span class="period">/год</span></div>
+                                <button class="btn plan-btn" onclick="purchaseSubscription('DataHub', 'yearly')">Купить подписку</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Призыв к авторизации (для неавторизованных) -->
+                        <div id="authPrompt" class="auth-prompt">
+                            <div class="auth-prompt-content">
+                                <h3>🔐 Для просмотра цен и покупки подписки</h3>
+                                <p>Войдите в систему или зарегистрируйтесь</p>
+                                <a href="./auth/" class="btn">Войти в систему</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>© 2024 CivilX. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Проверка авторизации и настройка интерфейса
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const quantitySection = document.getElementById('quantitySection');
+            const pricingSection = document.getElementById('pricingSection');
+            const authPrompt = document.getElementById('authPrompt');
+            
+            if (token) {
+                // Пользователь авторизован - показываем цены и кнопки
+                quantitySection.style.display = 'block';
+                pricingSection.style.display = 'flex';
+                authPrompt.style.display = 'none';
+            } else {
+                // Пользователь не авторизован - показываем призыв к авторизации
+                quantitySection.style.display = 'none';
+                pricingSection.style.display = 'none';
+                authPrompt.style.display = 'block';
+            }
+        }
+
+        // Покупка подписки
+        async function purchaseSubscription(subscriptionName, planType) {
+            console.log('Покупка подписки:', subscriptionName, planType);
+            
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Необходимо войти в систему');
+                window.location.href = './auth/';
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            console.log('Количество:', quantity);
+
+            console.log('Отправка запроса на покупку...');
+
+            try {
+                const requestData = {
+                    product_name: subscriptionName,
+                    plan_type: planType,
+                    quantity: quantity,
+                    plugin_group: subscriptionName  // Добавляем группу плагина
+                };
+                
+                console.log('Данные запроса:', requestData);
+                
+                const response = await fetch('/auth-api.php/api/purchase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('Ответ сервера:', response.status, response.statusText);
+                
+                const result = await response.json();
+                console.log('Результат:', result);
+                
+                if (response.ok) {
+                    alert(result.message || 'Подписка успешно приобретена!');
+                    // Перенаправление в личный кабинет для просмотра купленных подписок
+                    window.location.href = './dashboard/';
+                } else {
+                    alert('Ошибка: ' + (result.message || result.error || 'Неизвестная ошибка'));
+                }
+            } catch (error) {
+                console.error('Ошибка при покупке подписки:', error);
+                alert('Произошла ошибка при покупке подписки. Попробуйте еще раз.');
+            }
+        }
+
+        // Проверяем авторизацию при загрузке страницы
+        checkAuth();
+        
+        // Linear.app style scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in class to all cards and sections
+            const cards = document.querySelectorAll('.subscription-card');
+            const sections = document.querySelectorAll('.section');
+            
+            cards.forEach(card => {
+                card.classList.add('fade-in');
+            });
+            
+            sections.forEach(section => {
+                section.classList.add('fade-in');
+            });
+            
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all fade-in elements
+            document.querySelectorAll('.fade-in').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Header scroll effect
+            let lastScrollY = window.scrollY;
+            const header = document.querySelector('.header');
+            
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                
+                if (currentScrollY > 100) {
+                    header.style.background = 'rgba(0,0,0,0.95)';
+                    header.style.backdropFilter = 'blur(20px)';
+                } else {
+                    header.style.background = 'rgba(0,0,0,0.8)';
+                    header.style.backdropFilter = 'blur(20px)';
+                }
+                
+                lastScrollY = currentScrollY;
+            });
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

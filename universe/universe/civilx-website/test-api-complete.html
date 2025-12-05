@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Полная проверка API CivilX</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { padding: 8px; width: 250px; border: 1px solid #ccc; border-radius: 3px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .code { background: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+        .clear-btn { background: #dc3545; }
+        .clear-btn:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Полная проверка API CivilX</h1>
+    
+    <!-- Проверка текущего состояния -->
+    <div class="test-section">
+        <h3>📊 Текущее состояние</h3>
+        <button onclick="checkCurrentState()">Проверить localStorage</button>
+        <div id="currentState" class="result info" style="display: none;"></div>
+    </div>
+    
+    <!-- Тест авторизации -->
+    <div class="test-section">
+        <h3>🔐 Тест авторизации</h3>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="test@example.com" placeholder="Введите email">
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" value="password123" placeholder="Введите пароль">
+        </div>
+        <button onclick="testLogin()">Тест авторизации</button>
+        <div id="loginResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <!-- Тест API эндпоинтов -->
+    <div class="test-section">
+        <h3>🌐 Тест API эндпоинтов</h3>
+        <button onclick="testApiEndpoints()">Проверить все эндпоинты</button>
+        <div id="apiResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <!-- Тест ЛК -->
+    <div class="test-section">
+        <h3>👤 Тест Личного кабинета</h3>
+        <button onclick="testDashboard()">Проверить ЛК</button>
+        <div id="dashboardResult" class="result" style="display: none;"></div>
+    </div>
+    
+    <!-- Очистка -->
+    <div class="test-section">
+        <h3>🧹 Очистка</h3>
+        <button onclick="clearStorage()" class="clear-btn">Очистить localStorage</button>
+        <button onclick="location.reload()">Перезагрузить страницу</button>
+    </div>
+    
+    <script>
+        // Проверка текущего состояния
+        function checkCurrentState() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            const resultDiv = document.getElementById('currentState');
+            
+            resultDiv.style.display = 'block';
+            
+            if (token) {
+                const tokenParts = token.split('.');
+                resultDiv.className = 'result info';
+                resultDiv.innerHTML = `
+                    <h4>✅ Токен найден</h4>
+                    <p><strong>Тип:</strong> ${typeof token}</p>
+                    <p><strong>Длина:</strong> ${token.length}</p>
+                    <p><strong>Частей:</strong> ${tokenParts.length}</p>
+                    <p><strong>Формат:</strong> ${tokenParts.length === 3 ? 'JWT ✅' : 'НЕ JWT ❌'}</p>
+                    <p><strong>Превью:</strong> ${token.substring(0, 50)}...</p>
+                    <p><strong>Пользователь:</strong> ${user ? JSON.parse(user).name : 'Не найден'}</p>
+                `;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<h4>❌ Токен не найден</h4><p>localStorage пуст</p>';
+            }
+        }
+        
+        // Тест авторизации
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Отправка запроса...';
+            
+            try {
+                console.log('🔐 Тест авторизации...');
+                console.log('Email:', email);
+                
+                const response = await fetch('/auth-api.php/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('📄 Response text:', responseText);
+                console.log('📏 Response length:', responseText.length);
+                
+                if (!responseText.trim()) {
+                    throw new Error('Пустой ответ от сервера');
+                }
+                
+                const result = JSON.parse(responseText);
+                console.log('📊 Parsed result:', result);
+                
+                if (result.token) {
+                    const tokenParts = result.token.split('.');
+                    console.log('🎫 Token analysis:');
+                    console.log('  - Type:', typeof result.token);
+                    console.log('  - Length:', result.token.length);
+                    console.log('  - Parts:', tokenParts.length);
+                    console.log('  - Preview:', result.token.substring(0, 50) + '...');
+                    
+                    // Сохраняем токен
+                    localStorage.setItem('authToken', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h4>✅ Авторизация успешна!</h4>
+                        <div class="code">Токен: ${result.token.substring(0, 100)}...
+Тип: ${typeof result.token}
+Длина: ${result.token.length}
+Частей: ${tokenParts.length}
+Формат: ${tokenParts.length === 3 ? 'JWT ✅' : 'НЕ JWT ❌'}
+Пользователь: ${result.user.name} (${result.user.email})</div>
+                        <p><a href="/dashboard/" target="_blank">Перейти в ЛК</a></p>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h4>❌ Ошибка авторизации</h4>
+                        <div class="code">Ошибка: ${result.error || 'Неизвестная ошибка'}
+Статус: ${response.status}
+Ответ: ${responseText}</div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('💥 Ошибка:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ Ошибка запроса</h4>
+                    <div class="code">Ошибка: ${error.message}
+Stack: ${error.stack}</div>
+                `;
+            }
+        }
+        
+        // Тест API эндпоинтов
+        async function testApiEndpoints() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Проверка эндпоинтов...';
+            
+            const endpoints = [
+                { name: 'Available Versions', url: '/auth-api.php/api/available-versions', method: 'GET' },
+                { name: 'Product Versions', url: '/auth-api.php/api/product-versions', method: 'GET' },
+                { name: 'Subscription Products', url: '/auth-api.php/api/subscription-products', method: 'GET' }
+            ];
+            
+            let results = [];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    console.log(`🌐 Тестируем ${endpoint.name}...`);
+                    
+                    const response = await fetch(endpoint.url, {
+                        method: endpoint.method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const responseText = await response.text();
+                    const isJson = responseText.trim().startsWith('{') || responseText.trim().startsWith('[');
+                    
+                    results.push({
+                        name: endpoint.name,
+                        status: response.status,
+                        ok: response.ok,
+                        isJson: isJson,
+                        length: responseText.length,
+                        preview: responseText.substring(0, 100)
+                    });
+                    
+                } catch (error) {
+                    results.push({
+                        name: endpoint.name,
+                        status: 'ERROR',
+                        ok: false,
+                        error: error.message
+                    });
+                }
+            }
+            
+            let html = '<h4>🌐 Результаты проверки эндпоинтов</h4>';
+            results.forEach(result => {
+                const statusClass = result.ok ? 'success' : 'error';
+                html += `
+                    <div class="result ${statusClass}">
+                        <strong>${result.name}</strong><br>
+                        Статус: ${result.status}<br>
+                        ${result.error ? `Ошибка: ${result.error}` : `
+                        JSON: ${result.isJson ? 'Да' : 'Нет'}<br>
+                        Длина: ${result.length}<br>
+                        Превью: ${result.preview}...
+                        `}
+                    </div>
+                `;
+            });
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        // Тест ЛК
+        async function testDashboard() {
+            const token = localStorage.getItem('authToken');
+            const resultDiv = document.getElementById('dashboardResult');
+            
+            resultDiv.style.display = 'block';
+            
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<h4>❌ Нет токена</h4><p>Сначала авторизуйтесь</p>';
+                return;
+            }
+            
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = 'Проверка ЛК...';
+            
+            try {
+                console.log('👤 Тестируем ЛК...');
+                
+                // Тест /api/me
+                const meResponse = await fetch('/auth-api.php/api/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                const meText = await meResponse.text();
+                console.log('👤 /api/me response:', meText);
+                
+                // Тест /api/user-products
+                const productsResponse = await fetch('/auth-api.php/api/user-products', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                const productsText = await productsResponse.text();
+                console.log('📦 /api/user-products response:', productsText);
+                
+                let html = '<h4>👤 Результаты проверки ЛК</h4>';
+                
+                // Результат /api/me
+                html += `
+                    <div class="result ${meResponse.ok ? 'success' : 'error'}">
+                        <strong>/api/me</strong><br>
+                        Статус: ${meResponse.status}<br>
+                        Длина: ${meText.length}<br>
+                        Превью: ${meText.substring(0, 100)}...
+                    </div>
+                `;
+                
+                // Результат /api/user-products
+                html += `
+                    <div class="result ${productsResponse.ok ? 'success' : 'error'}">
+                        <strong>/api/user-products</strong><br>
+                        Статус: ${productsResponse.status}<br>
+                        Длина: ${productsText.length}<br>
+                        Превью: ${productsText.substring(0, 100)}...
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('💥 Ошибка ЛК:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h4>❌ Ошибка ЛК</h4>
+                    <div class="code">Ошибка: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Очистка localStorage
+        function clearStorage() {
+            localStorage.clear();
+            alert('localStorage очищен!');
+            location.reload();
+        }
+        
+        // Автопроверка при загрузке
+        window.onload = function() {
+            console.log('🚀 Страница загружена, начинаем проверку...');
+            checkCurrentState();
+        };
+    </script>
+</body>
+</html>

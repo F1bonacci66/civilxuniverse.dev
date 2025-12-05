@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой тест API</title>
+</head>
+<body>
+    <h1>Простой тест API</h1>
+    <button onclick="testGet()">Тест GET запроса</button>
+    <button onclick="testPost()">Тест POST запроса</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testGet() {
+            try {
+                console.log('Тестируем GET запрос...');
+                const response = await fetch('/auth-api.php/api/available-versions', {
+                    method: 'GET'
+                });
+                
+                console.log('GET Status:', response.status);
+                console.log('GET Headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                console.log('GET Response text:', text);
+                console.log('GET Response length:', text.length);
+                
+                document.getElementById('result').innerHTML = '<h3>GET результат:</h3><pre>' + text + '</pre>';
+                
+            } catch (error) {
+                console.error('GET Error:', error);
+                document.getElementById('result').innerHTML = '<h3>GET ошибка:</h3><p style="color: red;">' + error.message + '</p>';
+            }
+        }
+        
+        async function testPost() {
+            try {
+                console.log('Тестируем POST запрос...');
+                const response = await fetch('/auth-api.php/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@test.com',
+                        password: 'test'
+                    })
+                });
+                
+                console.log('POST Status:', response.status);
+                console.log('POST Headers:', [...response.headers.entries()]);
+                
+                const text = await response.text();
+                console.log('POST Response text:', text);
+                console.log('POST Response length:', text.length);
+                
+                document.getElementById('result').innerHTML = '<h3>POST результат:</h3><pre>' + text + '</pre>';
+                
+            } catch (error) {
+                console.error('POST Error:', error);
+                document.getElementById('result').innerHTML = '<h3>POST ошибка:</h3><p style="color: red;">' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

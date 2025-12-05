@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест авторизации</title>
+</head>
+<body>
+    <h1>Тест авторизации</h1>
+    <form id="loginForm">
+        <div>
+            <label>Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div>
+            <label>Пароль:</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Войти</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                console.log('Отправляем запрос на авторизацию...');
+                console.log('Email:', email);
+                console.log('Password length:', password.length);
+                
+                const response = await fetch('/auth-api.php/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('Ответ сервера (текст):', responseText);
+                console.log('Длина ответа:', responseText.length);
+                console.log('Статус ответа:', response.status);
+                
+                if (!responseText.trim()) {
+                    throw new Error('Пустой ответ от сервера');
+                }
+                
+                const result = JSON.parse(responseText);
+                console.log('Ответ сервера (JSON):', result);
+                
+                if (result.token) {
+                    console.log('=== АНАЛИЗ ТОКЕНА ===');
+                    console.log('Token type:', typeof result.token);
+                    console.log('Token length:', result.token.length);
+                    console.log('Token parts:', result.token.split('.').length);
+                    console.log('Token value:', result.token);
+                    console.log('Token first 50 chars:', result.token.substring(0, 50));
+                    console.log('Token last 50 chars:', result.token.substring(result.token.length - 50));
+                    
+                    // Проверяем, является ли это JWT
+                    const parts = result.token.split('.');
+                    if (parts.length === 3) {
+                        console.log('✅ Это JWT токен');
+                        try {
+                            const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                            console.log('JWT Header:', header);
+                            console.log('JWT Payload:', payload);
+                        } catch (e) {
+                            console.log('❌ Ошибка декодирования JWT:', e);
+                        }
+                    } else {
+                        console.log('❌ Это НЕ JWT токен (ожидается 3 части, получено ' + parts.length + ')');
+                    }
+                    
+                    // Сохраняем токен
+                    localStorage.setItem('authToken', result.token);
+                    console.log('Токен сохранен в localStorage');
+                    
+                    // Проверяем, что сохранилось
+                    const savedToken = localStorage.getItem('authToken');
+                    console.log('Сохраненный токен:', savedToken);
+                    console.log('Токены совпадают:', result.token === savedToken);
+                }
+                
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('result').innerHTML = '<p style="color: red;">Ошибка: ' + error.message + '</p>';
+            }
+        });
+    </script>
+</body>
+</html>

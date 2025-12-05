@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест авторизации</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; }
+        input { padding: 8px; width: 200px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 20px 0; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>Тест авторизации CivilX</h1>
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" value="test@example.com">
+    </div>
+    
+    <div class="form-group">
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" value="password123">
+    </div>
+    
+    <button onclick="testLogin()">Тест авторизации</button>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = 'Отправка запроса...';
+            
+            try {
+                console.log('Отправляем запрос на авторизацию...');
+                console.log('Email:', email);
+                console.log('Password:', password);
+                
+                const response = await fetch('/auth-api.php/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                console.log('Response text length:', responseText.length);
+                
+                if (!responseText.trim()) {
+                    throw new Error('Пустой ответ от сервера');
+                }
+                
+                const result = JSON.parse(responseText);
+                console.log('Parsed result:', result);
+                
+                if (result.token) {
+                    console.log('Token type:', typeof result.token);
+                    console.log('Token length:', result.token.length);
+                    console.log('Token parts:', result.token.split('.').length);
+                    console.log('Token preview:', result.token.substring(0, 50) + '...');
+                    
+                    // Сохраняем токен
+                    localStorage.setItem('authToken', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h3>✅ Авторизация успешна!</h3>
+                        <p><strong>Токен:</strong> ${result.token.substring(0, 50)}...</p>
+                        <p><strong>Тип токена:</strong> ${typeof result.token}</p>
+                        <p><strong>Длина токена:</strong> ${result.token.length}</p>
+                        <p><strong>Частей токена:</strong> ${result.token.split('.').length}</p>
+                        <p><strong>Пользователь:</strong> ${result.user.name} (${result.user.email})</p>
+                        <p><a href="/dashboard/">Перейти в ЛК</a></p>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h3>❌ Ошибка авторизации</h3>
+                        <p><strong>Ошибка:</strong> ${result.error || 'Неизвестная ошибка'}</p>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Ошибка запроса</h3>
+                    <p><strong>Ошибка:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        // Проверяем текущий токен
+        window.onload = function() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                console.log('Текущий токен в localStorage:', token.substring(0, 50) + '...');
+                console.log('Тип токена:', typeof token);
+                console.log('Длина токена:', token.length);
+                console.log('Частей токена:', token.split('.').length);
+            } else {
+                console.log('Токен в localStorage отсутствует');
+            }
+        };
+    </script>
+</body>
+</html>

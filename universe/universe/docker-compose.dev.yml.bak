@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  universe:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: civilx-universe-dev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - HOSTNAME=0.0.0.0
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api/datalab}
+      - INTERNAL_API_URL=http://172.17.0.1:8000/api/datalab
+      - DOCKER_CONTAINER=true
+    volumes:
+      # Монтируем исходный код для hot reload
+      - ./app:/app/app
+      - ./components:/app/components
+      - ./lib:/app/lib
+      - ./next.config.mjs:/app/next.config.mjs
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tailwind.config.ts:/app/tailwind.config.ts
+      - ./postcss.config.mjs:/app/postcss.config.mjs
+      # Исключаем node_modules и .next из монтирования (используем из контейнера)
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - app-network
+    command: npm run dev
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  app-network:
+    driver: bridge
+    name: civilx-universe-network-dev
+
