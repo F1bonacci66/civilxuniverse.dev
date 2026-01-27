@@ -1,8 +1,0 @@
-# CivilX.Universe Backend API
-
-
-
-
-
-
-
