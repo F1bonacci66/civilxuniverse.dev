@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   universe:
-    image: civilx-universe:local
+    image: civilx-universe-dev:local
     container_name: civilx-universe
     restart: unless-stopped
     ports:

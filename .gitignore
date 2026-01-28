@@ -1,0 +1,5 @@
+node_modules/
+universe/node_modules/
+universe/.next/
+backend/venv/
+backend/storage/
